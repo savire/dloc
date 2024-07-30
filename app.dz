@@ -1,0 +1,84 @@
+# Use Console Mode with no Database support
+U console
+
+# App information
+L APP_NAME = "DoZe Line Counter"
+L APP_VERSION = "1.0.0"
+L APP_DESC = "Count lines for DoZe Apps"
+
+# Add additional native rust libs
+A "extended_lib" {
+# fn get_directory() -> String {
+#   let args: Vec<String> = env::args().collect();
+#   if args.len() > 1 {
+#     args[1].clone()
+#   } else {
+#     "".to_string()
+#   } 
+# }
+#
+}
+
+# Print our License
+D print_license {
+  L lic = style("Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.")
+  Z "{}\n\n", lic.dim()
+}
+
+# Main App entry point
+D main {
+	Z "{}", styled(APP_NAME, "red")
+	Z "Version: {}", styled(APP_VERSION, "white")
+	Z "{}", styled(APP_DESC, "yellow")
+	Z "{}", styled("(c)2004 David Susanto<david.susanto@isoft-id.com>", "green")
+  Z ""
+  print_license()
+  
+  # Define counter vars
+  L -f_css = 0
+  L -n_css = 0
+  L -f_js = 0
+  L -n_js = 0
+  L -f_dz = 0
+  L -n_dz = 0
+  
+  L arg = get_directory()
+  I arg=="" {
+    Z "Usage: app [TARGET]"
+  } EL {
+    Z "Processing = {arg}\n"
+    L files = file_list_all(&arg)
+    F file : files {
+      L ext = get_ext(&file)
+      I ext=="css" || ext=="js" || ext=="dz" {
+        L lines = count_lines(&file)
+        I ext=="css" {
+          f_css += lines
+          n_css += 1
+        } 
+        I ext=="js" {
+          f_js += lines
+          n_js += 1
+        } 
+        I ext=="dz" {
+          f_dz += lines
+          n_dz += 1
+        }
+      }
+    }
+    Z "{}", styled("Results:", "green")
+    Z "========"
+    L o_dz  = format!("DoZe Source Codes       = {f_dz} in {n_dz} file(s)")
+    L o_js  = format!("Javascript Source Codes = {f_js} in {n_js} file(s)")
+    L o_css = format!("CSS Source Codes        = {f_css} in {n_css} file(s)")
+    Z "{}", styled(&o_dz, "green")
+    Z "{}", styled(&o_js, "green")
+    Z "{}", styled(&o_css, "green")
+    Z "\n"  
+    Z "Build with ❤️ using DoZe version 1.0\n\n"
+  }
+}
